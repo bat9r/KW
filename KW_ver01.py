@@ -1,5 +1,16 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+'''
+Add files (pdf, txt, docx) to the left column. Type key words in the right column.
+Click (Search words) button. In the dialog window choose where to save the
+file (*.txt). The file will contain the key words plus two lines before and two
+lines after them, from all the files added.
 
+Modules which are used: PyQt5, docx2txt, pdfminer3k.
+All of them must be installed, you can get them using pip3.
+
+License GNU/GPLv3
+'''
 #Import modules for UI
 import sys
 from PyQt5.QtCore import Qt
@@ -15,7 +26,7 @@ import docx2txt
 
 class Parser:
     def __init__(self, fileName):
-        #Grab from string type of file
+        #Extract file type from string
         typeFile = fileName.split('.')[-1]
         #For search method
         self.fileNameWithoutPath = str(fileName).split('/')[-1]
@@ -36,7 +47,7 @@ class Parser:
         matrixDoc = []
         try:
             for line in fileTxt:
-                #Deleting trash tabs and empty strings (\n)
+                #Deleting trash, tabs and empty strings (\n)
                 if line == '\n':
                     continue
                 line = line.strip('\t')
@@ -45,7 +56,7 @@ class Parser:
         finally:
             #Close file
             fileTxt.close()
-        #Cleaning from empty strings
+        #Getting rid of empty strings
         matrixDoc = list(filter(bool, matrixDoc))
         for i in range(len(matrixDoc)):
             matrixDoc[i] = matrixDoc[i].split(' ')
@@ -58,16 +69,16 @@ class Parser:
     Function for parsing docx file, returns matrixDoc[lines, [words, ]]
     '''
     def docxParse(self, docName):
-        #Grab text from docx
+        #Extract text from docx
         matrixDoc= docx2txt.process(docName)
-        #Split to lines, then to words
+        #Split to lines
         matrixDoc = matrixDoc.split('\n')
-        #Cleaning from empty strings
+        #Getting rid of empty strings
         matrixDoc = list(filter(bool, matrixDoc))
-        #Spliting on words
+        #Split to words
         for i in range(len(matrixDoc)):
             matrixDoc[i] = matrixDoc[i].split(' ')
-        #Mark out of file
+        #Mark end of file
         matrixDoc.insert(0, "$$OutOfFile")
         matrixDoc.append("$$OutOfFile")
         return matrixDoc
@@ -87,16 +98,16 @@ class Parser:
         document.set_parser(parser)
         #Password for pdf
         document.initialize('')
-        #Try parse document, is it allows text extraction
+        #Try parse document, if allowed extract text
         if not document.is_extractable:
             raise PDFTextExtractionNotAllowed
-        # Create a PDF resource manager object that stores shared resources.
+        #Create a PDF resource manager object that stores shared resources.
         resourceManager = PDFResourceManager()
         #Parameters for spacing
         laparams = LAParams()
-        # Create a PDF device object.
+        #Create a PDF device object.
         device = PDFPageAggregator(resourceManager, laparams=laparams)
-        # Create a PDF interpreter object.
+        #Create a PDF interpreter object.
         interpreter = PDFPageInterpreter(resourceManager, device)
         # Process each page contained in the document.
         matrixDoc = ''
@@ -104,36 +115,36 @@ class Parser:
             interpreter.process_page(page)
             layout = device.get_result()
             for lt_obj in layout:
-                #LTTextBox it is box with text, LTTextLine ->line of text
+                #LTTextBox is a text box, LTTextLine -> line of text
                 if isinstance(lt_obj, LTTextBox) or isinstance(lt_obj, LTTextLine):
                     matrixDoc += lt_obj.get_text()
-        #Create matrix from one peace of text
+        #Create matrix from one piece of text
         matrixDoc = matrixDoc.split('\n')
-        #Cleaning from empty strings
+        #Getting rid of empty strings
         matrixDoc = list(filter(bool, matrixDoc))
         for i in range(len(matrixDoc)):
             matrixDoc[i] = matrixDoc[i].split(' ')
         #Close file
         fileInBinary.close()
-        #Mark out of file
+        #Mark end of file
         matrixDoc.insert(0, "$$OutOfFile")
         matrixDoc.append("$$OutOfFile")
         return matrixDoc
 
     '''
-    Function for searching in file word, returns name & 5 lines with word
+    Function for word searching in file, returns name & 5 lines with the word
     '''
 
     def search(self, keyWord):
+        #Create list for lines with KeyWord
         linesWithKeyWords = []
         #Put keyWord symbols in lowercase
         keyWord = keyWord.lower()
-        #List of badSymbols , delete from words
+        #List of badSymbols, to be deleted from linesWithKeyWords
         badSymbols = "!@.,/#$%:;'?()-"
         #Get lines from allText
         for i in range(len(self.allText)):
-            #print(self.allText[i])
-            #Cleaning words from badSymbols, and put in lowercase
+            #Clean words from badSymbols, and put in lowercase
             for word in self.allText[i]:
                 for char in badSymbols:
                     word = word.replace(char , '')
@@ -142,18 +153,18 @@ class Parser:
                 if keyWord == word:
                     linesWithKeyWords.append(self.fileNameWithoutPath)
                     for j in [-2,-1,0,1,2]:
-                        #Checking of ending file
+                        #Checking end of file
                         if self.allText[i+j] == "$$OutOfFile":
                             continue
                         linesWithKeyWords.append(self.allText[i+j])
-                    #TODO Delete this
+                    #Append end of line, for each line
                     linesWithKeyWords.append('\n')
         return linesWithKeyWords
 
 class AppUI(QWidget):
 
     def __init__(self):
-        #Start father (QWidget) constructor (__init__)
+        #Initialize father (QWidget) constructor (__init__)
         super().__init__()
 
         self.initUI()
@@ -188,15 +199,15 @@ class AppUI(QWidget):
         addWordButton.clicked.connect(self.addWord)
         searchWordsButton.clicked.connect(self.searchWords)
 
-        #Center labels in squar in grid
+        #Center labels in grid cell
         filesLabel.setAlignment(Qt.AlignCenter)
         wordsLabel.setAlignment(Qt.AlignCenter)
 
-        #Create grid and set spacing for squars
+        #Create grid and set spacing for cells
         grid = QGridLayout()
         grid.setSpacing(10)
 
-        #Add widget to grid
+        #Add widgets to grid
         grid.addWidget(filesLabel, 0, 0, 1, 2)
         grid.addWidget(wordsLabel, 0, 2, 1, 2)
         grid.addWidget(self.filesList, 1, 0, 1, 2)
@@ -219,13 +230,13 @@ class AppUI(QWidget):
         qr = self.frameGeometry()
         #Get resolution monitor, get center dot
         cp = QDesktopWidget().availableGeometry().center()
-        #Center rectangle in center window
+        #Move rectangle centre in window center
         qr.moveCenter(cp)
         #Move topLeft dot of window in topLeft of rectangle
         self.move(qr.topLeft())
 
     '''
-    Function open file dialog window. For choosing file and put file name in
+    Function open file dialog window. For choosing file and putting file name in
     filesList list.
     '''
     def addFile(self):
@@ -233,7 +244,7 @@ class AppUI(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         filePath = QFileDialog.getOpenFileName(self, 'Open file', options=options)[0]
-        #Add words for list, for parsing
+        #Add words to list, for parsing
         self.listOfFiles.append(str(filePath))
         fileName = str(filePath).split('/')[-1]
         self.filesList.addItem(fileName)
@@ -242,9 +253,9 @@ class AppUI(QWidget):
     Function get word from addWordLine and put word in wordsList list.
     '''
     def addWord(self):
-        #Add words for list, for UI
+        #Add words to list, for UI
         self.wordsList.addItem(self.addWordLine.text())
-        #Add words for list, for parsing
+        #Add words to list, for parsing
         self.listOfWords.append(str(self.addWordLine.text()))
         #Clear addWordLine
         self.addWordLine.clear()
@@ -260,7 +271,7 @@ class AppUI(QWidget):
         options |= QFileDialog.DontUseNativeDialog
         resultFilePath = str(QFileDialog.getSaveFileName(self, "Save file","",
             "Text Files (*.txt)", options=options)[0])
-        #Checking is it .txt, if not add type
+        #Checking if it is .txt, if not add type
         if ".txt" not in resultFilePath:
             resultFilePath += '.txt'
 
