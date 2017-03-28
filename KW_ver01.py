@@ -38,10 +38,10 @@ class Parser:
         if typeFile == 'txt' or typeFile == 'TXT':
             self.allText = self.txtParse(fileName)
 
-    '''
-    Function for parsing txt file, returns matrixDoc[lines, [words, ]]
-    '''
     def txtParse(self, txtName):
+        '''
+        Function for parsing txt file, returns matrixDoc[lines, [words, ]]
+        '''
         #Open file
         fileTxt = open(txtName)
         matrixDoc = []
@@ -65,10 +65,10 @@ class Parser:
         matrixDoc.append("$$OutOfFile")
         return matrixDoc
 
-    '''
-    Function for parsing docx file, returns matrixDoc[lines, [words, ]]
-    '''
     def docxParse(self, docName):
+        '''
+        Function for parsing docx file, returns matrixDoc[lines, [words, ]]
+        '''
         #Extract text from docx
         matrixDoc= docx2txt.process(docName)
         #Split to lines
@@ -83,10 +83,11 @@ class Parser:
         matrixDoc.append("$$OutOfFile")
         return matrixDoc
 
-    '''
-    Function for parsing pdf file, returns matrixDoc[lines, [words, ]]
-    '''
+
     def pdfParse(self, pdfName):
+        '''
+        Function for parsing pdf file, returns matrixDoc[lines, [words, ]]
+        '''
         #Open file in binary format
         fileInBinary = open(pdfName, 'rb')
         #Create a PDF parser object associated with the file
@@ -131,11 +132,10 @@ class Parser:
         matrixDoc.append("$$OutOfFile")
         return matrixDoc
 
-    '''
-    Function for word searching in file, returns name & 5 lines with the word
-    '''
-
     def search(self, keyWord):
+        '''
+        Function for word searching in file, returns name & 5 lines with the word
+        '''
         #Create list for lines with KeyWord
         linesWithKeyWords = []
         #Put keyWord symbols in lowercase
@@ -169,10 +169,10 @@ class AppUI(QWidget):
 
         self.initUI()
 
-    '''
-    Function initialize user interface
-    '''
     def initUI(self):
+        '''
+        Function initialize user interface
+        '''
         #Set window title, size and put in center
         self.setWindowTitle('KewWords')
         self.resize(400, 300)
@@ -222,10 +222,10 @@ class AppUI(QWidget):
         #Show window
         self.show()
 
-    '''
-    Function put window (self) in center of screen
-    '''
     def moveToCenter(self):
+        '''
+        Function put window (self) in center of screen
+        '''
         #Get rectangle, geometry of window
         qr = self.frameGeometry()
         #Get resolution monitor, get center dot
@@ -235,11 +235,11 @@ class AppUI(QWidget):
         #Move topLeft dot of window in topLeft of rectangle
         self.move(qr.topLeft())
 
-    '''
-    Function open file dialog window. For choosing file and putting file name in
-    filesList list.
-    '''
     def addFile(self):
+        '''
+        Function open file dialog window. For choosing file and putting file name in
+        filesList list.
+        '''
         #Open qt dialog for choosing files to add
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -249,10 +249,10 @@ class AppUI(QWidget):
         fileName = str(filePath).split('/')[-1]
         self.filesList.addItem(fileName)
 
-    '''
-    Function get word from addWordLine and put word in wordsList list.
-    '''
     def addWord(self):
+        '''
+        Function get word from addWordLine and put word in wordsList list.
+        '''
         #Add words to list, for UI
         self.wordsList.addItem(self.addWordLine.text())
         #Add words to list, for parsing
@@ -260,12 +260,12 @@ class AppUI(QWidget):
         #Clear addWordLine
         self.addWordLine.clear()
 
-    '''
-    Function for searching words from self.listOfWords in self.listOfFiles.
-    Also open dialog window for choosing output result file and write in this
-    file.
-    '''
     def searchWords(self):
+        '''
+        Function for searching words from self.listOfWords in self.listOfFiles.
+        Also open dialog window for choosing output result file and write in this
+        file.
+        '''
         #Open qt dialog for choosing directory for saving file
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
