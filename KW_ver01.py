@@ -292,7 +292,6 @@ class AppUI(QWidget):
         #Close file
         resultFile.close()
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = AppUI()
